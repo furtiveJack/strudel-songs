@@ -1,0 +1,103 @@
+setcpm(150/4)
+
+const kick = s("bd * 4")
+  .sometimesBy(.2, x => x.ply(2))
+  .bank("bossdr55")
+  .gain(1)
+  .compressor("-20:20:1:.01:.02")
+  .room(.1)
+  .postgain(1.25)
+
+const hh = s("[- hh] * 4")
+  .sometimesBy(.4, x => x.ply("1 | 2"))
+  .sometimesBy(.1, x => x.ply("2"))
+  .bank("bossdr55")
+  .pan(sine.slow(4).range(.25, .75))
+  .postgain(.2)
+
+const clap = s("[- cp] * 2")
+  .bank("rolandmc303")
+  .hpf(400)
+  .room(.1)
+  .gain(.5)
+
+const bongo = note(`
+    <[A#3 C#3 -]> |
+    <[B3 - C#3]>
+  `)
+  .sound("bongo")
+  .late(.9)
+  .euclid(choose("8", "16"), choose("32"))
+  .duration("0.25 | 1 | 0.5 | 0.75")
+  .velocity("0.7 0.8 0.9 1")
+  .adsr("0.01:0.15:0.3:0.2")
+  .pan(sine.slow(2))
+  .gain(3)
+  .mask("<0 0 1 1>/8")
+
+const bass = note("<<b1(5,8) b1> a#1 [f#1 f#1] g#1>@2 <[b1] [c#2] [g#1] [<f#1 a#1>]>")
+  .when("<1 1 0 0>/4", x => x.struct("[<0 1> 1] * 4"))
+  .when("<0 0 1 1>/4", x => x.struct("[<0 1 1 1> 1] * 4"))
+  .sound("gm_fretless_bass")
+  .compressor("-5:10:.01:.2")
+  .attack(.05)
+  .decay(.15)
+  .sustain(.05)
+  .release(0)
+  .lpf(sine.range(300, 1000))
+  .lpa("<.5 .25 .1 .01>/4")
+  .lpenv(4)
+  .postgain(1.5)
+  .mask("<0 1 1 1>/8")
+
+const synth = n("<[1,3,5,7] [0,2,4,6] [-2,0,2,4] [-1,1,3,5]>")
+  .scale("a#:phrygian")
+  .sound("gm_overdriven_guitar")
+  .attack(.7)
+  .release(.5)
+  .gain(.3)
+  .postgain(.7)
+  .lpf(sine.range(400, 900).slow(16))
+  .lpa(1)
+  .lpd(perlin.range(.02, .2))
+  .lps(perlin.range(0, .5).slow(4))
+  .lpq(sine.range(2, 10).slow(32))
+  .ftype('24db')
+  .room(1)
+
+const guitar = n(wchoose(["<[2,5] * 8>", 25], ["<[4, 6] * 4>", 10], ["<[4, 7] * 2>", 5]))
+  .scale("a#:phrygian")
+  .struct(`
+    [
+      [x x - -] | [x - x -] | [x - - x] |
+      [- x x -] | [- x - x] | [- - x x] |
+      [x x x -] | [- x x x] | [x x x x]
+    ] * 4
+   `.late(.05))
+  .sound("gm_electric_guitar_jazz")
+  .shuffle(2)
+  .velocity("0.6 | 0.8 | 0.9 | 1")
+  .jux(rev)
+  .gain(0.9)
+  .speed("1 | .1 | .9 | .5")
+  .adsr(".01:.1:.8:.08")
+  .compressor("-15:4:10:15:60")
+  .cut(1)
+  .hpf(400)
+  .lpf(sine.range(200,1500).fast(2))
+  .lpattack(.01).lpdecay(.1).lpsustain(.2).lprelease(.08).lpenv(0)
+  .phaser(2)
+  .delay(.25)
+  .room(.1)
+  .postgain(.35)
+  .mask("<0 0 1 1>/8")
+
+$: stack(
+  kick,
+  hh,
+  clap,
+  bongo,
+  bass,
+  synth,
+  guitar
+)
